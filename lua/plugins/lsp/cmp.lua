@@ -1,24 +1,76 @@
 return {
-	{ "hrsh7th/cmp-nvim-lsp" },
 	{
 		"hrsh7th/nvim-cmp",
-		config = function()
-			local cmp = require("cmp")
+		event = "InsertEnter",
+		dependencies = {
+			{
+				-- snippet plugin
+				"L3MON4D3/LuaSnip",
+				dependencies = "rafamadriz/friendly-snippets",
+				opts = { history = true, updateevents = "TextChanged,TextChangedI" },
+				config = function(_, opts)
+					require("luasnip").config.set_config(opts)
+					require("luasnip.loaders.from_vscode").lazy_load({ exclude = vim.g.vscode_snippets_exclude or {} })
+					require("luasnip.loaders.from_vscode").lazy_load({ paths = vim.g.vscode_snippets_path or "" })
 
-			cmp.setup({
-				sources = {
-					{ name = "nvim_lsp" },
+					-- snipmate format
+					require("luasnip.loaders.from_snipmate").load()
+					require("luasnip.loaders.from_snipmate").lazy_load({ paths = vim.g.snipmate_snippets_path or "" })
+
+					-- lua format
+					require("luasnip.loaders.from_lua").load()
+					require("luasnip.loaders.from_lua").lazy_load({ paths = vim.g.lua_snippets_path or "" })
+				end,
+			},
+
+			-- autopairing of (){}[] etc
+			{
+				"windwp/nvim-autopairs",
+				opts = {
+					fast_wrap = {},
+					disable_filetype = { "TelescopePrompt", "vim" },
 				},
-				mapping = cmp.mapping.preset.insert({
-					-- `Enter` key to confirm completion
-					["<CR>"] = cmp.mapping.confirm({ select = false }),
+				config = function(_, opts)
+					require("nvim-autopairs").setup(opts)
 
-					-- Ctrl+Space to trigger completion menu
+					-- setup cmp for autopairs
+					local cmp_autopairs = require("nvim-autopairs.completion.cmp")
+					require("cmp").event:on("confirm_done", cmp_autopairs.on_confirm_done())
+				end,
+			},
+
+			-- cmp sources plugins
+			{
+				"saadparwaiz1/cmp_luasnip",
+				"hrsh7th/cmp-nvim-lua",
+				"hrsh7th/cmp-nvim-lsp",
+				"hrsh7th/cmp-buffer",
+				"hrsh7th/cmp-path",
+			},
+		},
+		opts = function()
+			local cmp = require("cmp")
+			cmp.setup({
+				completion = { completeopt = "menu,menuone" },
+
+				snippet = {
+					expand = function(args)
+						require("luasnip").lsp_expand(args.body)
+					end,
+				},
+
+				mapping = {
+					["<C-p>"] = cmp.mapping.select_prev_item(),
+					["<C-n>"] = cmp.mapping.select_next_item(),
+					["<C-d>"] = cmp.mapping.scroll_docs(-4),
+					["<C-f>"] = cmp.mapping.scroll_docs(4),
 					["<C-Space>"] = cmp.mapping.complete(),
+					["<C-e>"] = cmp.mapping.close(),
 
-					-- Scroll up and down in the completion documentation
-					["<C-u>"] = cmp.mapping.scroll_docs(-4),
-					["<C-d>"] = cmp.mapping.scroll_docs(4),
+					["<CR>"] = cmp.mapping.confirm({
+						behavior = cmp.ConfirmBehavior.Insert,
+						select = true,
+					}),
 
 					["<Tab>"] = cmp.mapping(function(fallback)
 						if cmp.visible() then
@@ -29,11 +81,24 @@ return {
 							fallback()
 						end
 					end, { "i", "s" }),
-				}),
-				snippet = {
-					expand = function(args)
-						vim.snippet.expand(args.body)
-					end,
+
+					["<S-Tab>"] = cmp.mapping(function(fallback)
+						if cmp.visible() then
+							cmp.select_prev_item()
+						elseif require("luasnip").jumpable(-1) then
+							require("luasnip").jump(-1)
+						else
+							fallback()
+						end
+					end, { "i", "s" }),
+				},
+
+				sources = {
+					{ name = "nvim_lsp" },
+					{ name = "luasnip" },
+					{ name = "buffer" },
+					{ name = "nvim_lua" },
+					{ name = "path" },
 				},
 			})
 		end,
