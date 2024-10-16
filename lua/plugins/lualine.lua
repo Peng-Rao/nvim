@@ -5,6 +5,7 @@ return {
 		opts = {
 			icons_enabled = true,
 			theme = "tokyonight",
+			disabled_filetypes = { "NVimTree" },
 		},
 	},
 }
