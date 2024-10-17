@@ -8,33 +8,23 @@ return {
 		init = function()
 			vim.g.barbar_auto_setup = true
 		end,
-
+		opts = {},
 		config = function()
-			require("barbar").setup({
-				animation = true,
-				auto_hide = false,
-			})
-
-			local map = vim.api.nvim_set_keymap
-			local opts = { noremap = true, silent = true } -- Move to previous/next
-			map("n", "<S-Tab>", "<Cmd>BufferPrevious<CR>", opts)
-			map("n", "<Tab>", "<Cmd>BufferNext<CR>", opts)
-			-- Re-order to previous/next
-			map("n", "<A-<>", "<Cmd>BufferMovePrevious<CR>", opts)
-			map("n", "<A->>", "<Cmd>BufferMoveNext<CR>", opts)
-			-- Goto buffer in position...
-			map("n", "<A-1>", "<Cmd>BufferGoto 1<CR>", opts)
-			map("n", "<A-2>", "<Cmd>BufferGoto 2<CR>", opts)
-			map("n", "<A-3>", "<Cmd>BufferGoto 3<CR>", opts)
-			map("n", "<A-4>", "<Cmd>BufferGoto 4<CR>", opts)
-			map("n", "<A-5>", "<Cmd>BufferGoto 5<CR>", opts)
-			map("n", "<A-6>", "<Cmd>BufferGoto 6<CR>", opts)
-			map("n", "<A-7>", "<Cmd>BufferGoto 7<CR>", opts)
-			map("n", "<A-8>", "<Cmd>BufferGoto 8<CR>", opts)
-			map("n", "<A-9>", "<Cmd>BufferGoto 9<CR>", opts)
-			map("n", "<A-0>", "<Cmd>BufferLast<CR>", opts)
-			-- Close buffer
-			map("n", "<leader>x", "<Cmd>BufferClose<CR>", opts)
+			vim.keymap.set("n", "<Tab>", "<Cmd>BufferNext<CR>", { desc = "Move to next buffer" })
+			vim.keymap.set("n", "<S-Tab>", "<Cmd>BufferPrevious<CR>", { desc = "Move to previous buffer" })
+			vim.keymap.set("n", "<A-<>", "<Cmd>BufferMovePrevious<CR>", { desc = "Move to previous buffer" })
+			vim.keymap.set("n", "<A->>", "<Cmd>BufferMoveNext<CR>", { desc = "Move to next buffer" })
+			vim.keymap.set("n", "<A-1>", "<Cmd>BufferGoto 1<CR>", { desc = "Go to buffer 1" })
+			vim.keymap.set("n", "<A-2>", "<Cmd>BufferGoto 2<CR>", { desc = "Go to buffer 2" })
+			vim.keymap.set("n", "<A-3>", "<Cmd>BufferGoto 3<CR>", { desc = "Go to buffer 3" })
+			vim.keymap.set("n", "<A-4>", "<Cmd>BufferGoto 4<CR>", { desc = "Go to buffer 4" })
+			vim.keymap.set("n", "<A-5>", "<Cmd>BufferGoto 5<CR>", { desc = "Go to buffer 5" })
+			vim.keymap.set("n", "<A-6>", "<Cmd>BufferGoto 6<CR>", { desc = "Go to buffer 6" })
+			vim.keymap.set("n", "<A-7>", "<Cmd>BufferGoto 7<CR>", { desc = "Go to buffer 7" })
+			vim.keymap.set("n", "<A-8>", "<Cmd>BufferGoto 8<CR>", { desc = "Go to buffer 8" })
+			vim.keymap.set("n", "<A-9>", "<Cmd>BufferGoto 9<CR>", { desc = "Go to buffer 9" })
+			vim.keymap.set("n", "<A-0>", "<Cmd>BufferLast<CR>", { desc = "Go to last buffer" })
+			vim.keymap.set("n", "<leader>x", "<Cmd>BufferClose<CR>", { desc = "Close buffer" })
 		end,
 	},
 }
