@@ -47,3 +47,16 @@ autocmd("LspAttach", {
 		vim.keymap.set("n", "gs", "<cmd>lua vim.lsp.buf.signature_help()<cr>", opts)
 	end,
 })
+
+autocmd("BufEnter", {
+	pattern = "NvimTree*",
+	callback = function()
+		local view = require("nvim-tree.view")
+		local is_visible = view.is_visible()
+
+		local api = require("nvim-tree.api")
+		if not is_visible then
+			api.tree.open()
+		end
+	end,
+})
