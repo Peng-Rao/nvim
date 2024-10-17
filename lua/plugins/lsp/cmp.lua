@@ -39,6 +39,22 @@ return {
 				end,
 			},
 
+			{
+				"onsails/lspkind-nvim",
+				event = "InsertEnter",
+				config = function()
+					require("lspkind").setup()
+				end,
+			},
+
+			{
+				"zbirenbaum/copilot-cmp",
+				event = "InsertEnter",
+				config = function()
+					require("copilot_cmp").setup()
+				end,
+			},
+
 			-- cmp sources plugins
 			{
 				"saadparwaiz1/cmp_luasnip",
@@ -50,6 +66,16 @@ return {
 		},
 		opts = function()
 			local cmp = require("cmp")
+			local snip_status_ok, luasnip = pcall(require, "luasnip")
+			local lspkind = require("lspkind")
+			if not snip_status_ok then
+				return
+			end
+			local check_backspace = function()
+				local col = vim.fn.col(".") - 1
+				return col == 0 or vim.fn.getline("."):sub(col, col):match("%s")
+			end
+
 			cmp.setup({
 				completion = { completeopt = "menu,menuone" },
 
@@ -57,6 +83,14 @@ return {
 					expand = function(args)
 						require("luasnip").lsp_expand(args.body)
 					end,
+				},
+
+				formatting = {
+					format = lspkind.cmp_format({
+						mode = "symbol",
+						max_width = 50,
+						symbol_map = { Copilot = "" },
+					}),
 				},
 
 				mapping = {
@@ -75,8 +109,14 @@ return {
 					["<Tab>"] = cmp.mapping(function(fallback)
 						if cmp.visible() then
 							cmp.select_next_item()
-						elseif require("luasnip").expand_or_jumpable() then
-							require("luasnip").expand_or_jump()
+						elseif require("copilot.suggestion").is_visible() then
+							require("copilot.suggestion").accept()
+						elseif luasnip.expandable() then
+							luasnip.expand()
+						elseif luasnip.expand_or_jumpable() then
+							luasnip.expand_or_jump()
+						elseif check_backspace() then
+							fallback()
 						else
 							fallback()
 						end
@@ -85,8 +125,8 @@ return {
 					["<S-Tab>"] = cmp.mapping(function(fallback)
 						if cmp.visible() then
 							cmp.select_prev_item()
-						elseif require("luasnip").jumpable(-1) then
-							require("luasnip").jump(-1)
+						elseif luasnip.jumpable(-1) then
+							luasnip.jump(-1)
 						else
 							fallback()
 						end
@@ -96,9 +136,15 @@ return {
 				sources = {
 					{ name = "nvim_lsp" },
 					{ name = "luasnip" },
+					{ name = "copilot" },
 					{ name = "buffer" },
 					{ name = "nvim_lua" },
 					{ name = "path" },
+				},
+				window = {
+					documentation = {
+						border = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" },
+					},
 				},
 			})
 		end,
